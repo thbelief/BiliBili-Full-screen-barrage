@@ -1,3 +1,16 @@
+// ==UserScript==
+// @name         BiliBili全屏弹幕发送(回车)
+// @namespace    https://github.com/thbelief/BiliBili-Full-screen-barrage
+// @version      1.0.0
+// @description  在B站看视频的时候全屏状态下默认是不能发送弹幕的，这个脚本的功能就是在全屏状态下回车键弹出发送弹幕的sendbar~
+// @author       thbelief
+// @match        *://www.bilibili.com/bangumi/play/ep*
+// @match        *://www.bilibili.com/bangumi/play/ss*
+// @match        *://www.bilibili.com/video/av*
+// @match        *://www.bilibili.com/watchlater/*
+// @grant        GM_setValue
+// @grant        GM_getValue
+// ==/UserScript==
 (function() {
     'use strict';
     //选择
@@ -32,33 +45,44 @@
         }
         return nodes;
     }
-
-    // 判断是否是全屏
-    let isFullScreen = document.isFullScreen || document.mozIsFullScreen || document.webkitIsFullScreen;
-    console.log("是否全屏状态："+isFullScreen);
-    if(isFullScreen){
-        //如果是全屏状态的话，就进行回车键弹出发送弹幕的效果
-        let isSendBarExist=false;
-        function fun(){
-            console.log("提示：在全屏状态下按了回车键！");
-           if(isSendBarExist){
-               isSendBarExist=false;
-               console.log("提示：已隐藏发送弹幕按钮！");
-                q('.bilibili-player-video-sendbar').css('opacity', 0).css('display', 'none')[0];
-           }else{
-                isSendBarExist=true;
-                console.log("提示：已显示发送弹幕按钮！");
-                q('.bilibili-player-video-sendbar').css('opacity', 1).css('display', 'flex');
-                //使输入框自动获得焦点
-                $('input').focus();
-           }
-
-        };
-        document.onkeydown = function (e) {
-            if (!e) e = window.event;
-            if ((e.keyCode || e.which) == 13) {
-                fun();//全屏状态下按了回车键触发的方法
+    
+    let isSendBarExist=false;
+    function doIt(){
+        //监控是否按下回车键
+        document.onkeydown = function (eTest) {
+            if (!eTest) eTest = window.event;
+            if ((eTest.keyCode || eTest.which) == 13) {
+                // 判断是否是全屏
+                let isFullScreen = document.isFullScreen || document.mozIsFullScreen || document.webkitIsFullScreen;
+                console.log("是否全屏状态："+isFullScreen);
+               
+                function fun(){
+                    console.log("提示：在全屏状态下按了回车键！");
+                    if(isSendBarExist){
+                        isSendBarExist=false;
+                        console.log("提示：已隐藏发送弹幕按钮！");
+                        q('.bilibili-player-video-sendbar').css('opacity', 0).css('display', 'none')[0];
+                    }else{
+                        isSendBarExist=true;
+                        console.log("提示：已显示发送弹幕按钮！");
+                        //老版
+                        q('.bilibili-player-video-sendbar').css('opacity', 1).css('display', 'flex');
+                        
+                        //使输入框自动获得焦点
+                        $('input').focus();
+                    }
+                };
+                if(isFullScreen){
+                    //如果是全屏状态的话，就进行回车键弹出发送弹幕的效果
+                    fun();
+                }else{
+                    console.log("提示：未进入全屏状态！");
+                    
+                }
             }
         }
+        
     }
+   doIt();
+    
 })();
